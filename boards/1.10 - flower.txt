@@ -19,4 +19,4 @@ solve(
             [(red, 2), (red, 2), (green, 2)]
         ],
         Output
-).
+), print_board(Output).

@@ -18,4 +18,4 @@ solve(
             [(blue, 7)]
         ],
         Output
-).
+), print_board(Output).

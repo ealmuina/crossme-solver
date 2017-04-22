@@ -118,8 +118,7 @@ solve(Rows, Columns, Board) :-
     store_info(0, column, Columns), 
     store_cells(0, 0), 
     solve, 
-    load_board(0, Board),
-    clean.
+    load_board(0, Board).
 
 
 %% store_info(Pos, Type, Layout)
@@ -196,6 +195,32 @@ clean(Type, Count) :-
     clean(Type, Count).
 
 clean(_, _).
+
+
+%% print_board(Board)
+%% Print a board solution on console.
+%% Board: List of Lists of colors representing a solution.
+
+print_board([]).
+
+print_board([Row | Board]) :-
+    print_row(Row),
+    print_board(Board).
+
+
+%% print_row(Row)
+%% Print a row of a board solution.
+%% Row: List of colors representing a row of the solution.
+
+print_row([]) :- format('~n').
+
+print_row([empty | Row]) :- !,
+    ansi_format(fg(default), '#', []),
+    print_row(Row).
+
+print_row([Color | Row]) :-
+    ansi_format(fg(Color), '#', []),
+    print_row(Row).
 
 
 %% *(1) it's not completely valid since groups of the same color might be put together, but those cases will fail when checking the columns...

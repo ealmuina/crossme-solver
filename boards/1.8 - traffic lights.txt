@@ -18,4 +18,4 @@ solve(
             [(black, 10)]
         ],
         Output
-).
+), print_board(Output).

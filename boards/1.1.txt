@@ -6,4 +6,4 @@ solve(
             [(blue, 1)], [(blue, 1)], [(blue, 1)], [(blue, 1)], [(blue, 1)]
         ],
         Output
-).
+), print_board(Output).

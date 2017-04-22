@@ -11,4 +11,4 @@ solve(
             [(blue, 1), (green, 1)]  
         ],
         Output
-).
+), print_board(Output).

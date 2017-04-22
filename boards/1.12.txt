@@ -20,4 +20,4 @@ solve(
             [(blue, 2), (blue, 2)]
         ],
         Output
-).
+), print_board(Output).
