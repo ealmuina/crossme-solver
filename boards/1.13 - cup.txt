@@ -1,0 +1,26 @@
+solve(
+        [
+            [(black, 1)],
+            [(black, 2)],
+            [(black, 1)],
+            [(black, 1)],
+            [(magenta, 8)],
+            [(cyan, 10)],
+            [(cyan, 1), (cyan, 8)],
+            [(cyan, 8)],
+            [(cyan, 4)]
+        ],
+        [
+            [(cyan, 2)],
+            [(cyan, 1), (cyan, 1)],
+            [(magenta, 1), (cyan, 3)],
+            [(magenta, 1), (cyan, 3)],
+            [(magenta, 1), (cyan, 4)],
+            [(black, 2), (black, 1), (magenta, 1), (cyan, 4)],
+            [(black, 2), (magenta, 1), (cyan, 4)],
+            [(magenta, 1), (cyan, 4)],
+            [(magenta, 1), (cyan, 3)],
+            [(magenta, 1), (cyan, 2)]
+        ],
+        Output
+), print_board(Output).

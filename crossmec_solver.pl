@@ -1,5 +1,5 @@
 %% valid_row(R, Pos, Colors)
-%% Generate a valid* distribution of colors for the cells in row R.
+%% Generate a valid distribution of colors for the cells in row R.
 %% R: Number of the row.
 %% Pos: Position of the next cell to paint in the row.
 %% Colors: List of tuples (Color, Count) representing the valid layout for cells beginning from Pos.
@@ -7,12 +7,15 @@
 valid_row(R, Pos, []) :- !.
 
 valid_row(R, Pos, [(Color, Count) | Colors]) :-
+    Previous is Pos - 1,
+    not(cell(R, Previous, Color)), %% there can't be two consecutive groups with the same color
     set_group(R, Pos, Color, Count), 
     Next is Pos + Count, 
     valid_row(R, Next, Colors).
 
 valid_row(R, Pos, Colors) :-
     cell(R, Pos, _), %% fail if there are colors but no more cells
+    valid_column(Pos, R, empty),
     Next is Pos + 1, 
     valid_row(R, Next, Colors).
 
@@ -27,14 +30,19 @@ valid_row(R, Pos, Colors) :-
 set_group(_, _, _, 0) :- !.
 
 set_group(R, Pos, Color, Count) :- 
-    retract(cell(R, Pos, _)), 
-    assert(cell(R, Pos, Color)), 
+    valid_column(Pos, R, Color),
+    set_cell(R, Pos, Color),
     Next is Pos + 1, Remaining is Count - 1, 
     set_group(R, Next, Color, Remaining).
 
-set_group(R, Pos, Color, Count) :- %% there was a failure, clean cell
-    retract(cell(R, Pos, _)), 
-    assert(cell(R, Pos, empty)), 
+
+set_cell(R, C, Color) :-
+    retract(cell(R, C, _)), 
+    assert(cell(R, C, Color)).
+
+set_cell(R, C, Color) :- %% there was a failure, clean cell
+    retract(cell(R, C, _)), 
+    assert(cell(R, C, empty)), 
     fail. %% and fail again
 
 
@@ -51,58 +59,34 @@ fill_board(R) :-
 fill_board(R).
 
 
-%% valid_column(C, Pos, Colors)
-%% Check if cells in the column C follow a valid layout.
-%% C: Number of the column to validate.
-%% Pos: Position of the next cell to check in the column.
-%% Colors: List of tuples (Color, Count) representing the valid layout for cells beginning from Pos.
+valid_column(C, Pos, empty) :- !, column(C, [empty | _], _).
 
-valid_column(C, Pos, []) :- 
-    not(cell(Pos, C, _)), !. %% no more colors and no more cells
+valid_column(C, Pos, Color) :- 
+    column(C, [empty, Color | _], _), !,
+    Previous is Pos - 1,
+    not(cell(Previous, C, Color)), %% there can't be two consecutive groups with the same color
+    update_column(C, empty),
+    update_column(C, Color).
 
-valid_column(C, Pos, Colors) :- 
-    cell(Pos, C, empty), !,
-    Next is Pos + 1, 
-    valid_column(C, Next, Colors).
-
-valid_column(C, Pos, [(Color, Count) | Colors]) :- 
-    valid_group(C, Pos, Color, Count), 
-    Next is Pos + Count, 
-    valid_column(C, Next, Colors).
+valid_column(C, Pos, Color) :-
+    column(C, [Color | _], _),
+    update_column(C, Color).
 
 
-%% valid_group(C, Pos, Color, Count)
-%% Check if there is an adjacent group of cells in a column with the same color
-%% C: Number of the column.
-%% Pos: Position of the next cell to check in the group.
-%% Color: Color all cells in the group must have.
-%% Count: Amount of cells in the group.
+update_column(C, Color) :-
+    retract(column(C, [Color | RColors], Colors)),
+    assert(column(C, RColors, [Color | Colors])).
 
-valid_group(_, _, _, 0) :- !.
-
-valid_group(C, Pos, Color, Count) :- 
-    cell(Pos, C, Color), 
-    Next is Pos + 1, Remaining is Count - 1, 
-    valid_group(C, Next, Color, Remaining).
-
-
-%% valid(C)
-%% Check if all columns starting from C are valid.
-%% C: Next column to check.
-
-valid(C) :- 
-    column(C, Colors), !, 
-    valid_column(C, 0, Colors),
-    Next is C + 1, 
-    valid(Next).
-
-valid(C).
+update_column(C, Color) :-
+    retract(column(C, RColors, [Color | Colors])),
+    assert(column(C, [Color | RColors], Colors)),
+    fail.
 
 
 %% solve
 %% Generate valid rows and check them.
 
-solve :- fill_board(0), valid(0).
+solve :- fill_board(0).
 
 
 %%% USER INTERFACE
@@ -114,26 +98,36 @@ solve :- fill_board(0), valid(0).
 %% Board: List of Lists of colors (each List corresponding to a row); representing a valid solution.
 
 solve(Rows, Columns, Board) :- 
-    store_info(0, row, Rows), 
-    store_info(0, column, Columns), 
+    store_row(0, Rows), 
+    store_columns(0, Columns), 
     store_cells(0, 0), 
     solve, 
     load_board(0, Board).
 
+store_columns(_, []).
 
-%% store_info(Pos, Type, Layout)
-%% Store the information of a row/column layout in the database.
-%% Pos: Number of the row/column.
-%% Type: row if it's a row, column if it's a column.
-%% Layout: Layout of the row/column.
+store_columns(C, [Colors | Columns]) :-
+    expand_column(Colors, EColors),
+    assert(column(C, [empty | EColors], [])),
+    Next is C + 1,
+    store_columns(Next, Columns).
 
-store_info(_, _, []).
 
-store_info(Pos, Type, [Colors | L]) :- 
-    Fact =..[Type, Pos, Colors], 
-    assert(Fact), 
-    Next is Pos + 1, 
-    store_info(Next, Type, L).
+expand_column([], []).
+
+expand_column([(_, 0) | Colors], [empty | EColors]) :- !, expand_column(Colors, EColors).
+
+expand_column([(Color, Count) | Colors], [Color | EColors]) :-
+    Remaining is Count - 1,
+    expand_column([(Color, Remaining) | Colors], EColors).
+
+
+store_row(_, []).
+
+store_row(R, [Colors | L]) :- 
+    assert(row(R, Colors)), 
+    Next is R + 1, 
+    store_row(Next, L).
 
 
 %% store_cells(R, C)
@@ -144,7 +138,7 @@ store_info(Pos, Type, [Colors | L]) :-
 store_cells(R, C) :- not(row(R, _)), !. %% no more cells
 
 store_cells(R, C) :- 
-    not(column(C, _)), !, %% row end, go to the next one
+    not(column(C, _, _)), !, %% row end, go to the next one
     Next is R + 1, 
     store_cells(Next, 0).
 
@@ -181,7 +175,7 @@ just_color([(Pos, C, Color) | Row_full], [Color | Row]) :- just_color(Row_full, 
 %% clean
 %% Clean all information regarding to the game from the database.
 
-clean :- clean(row, 2), clean(column, 2), clean(cell, 3).
+clean :- clean(row, 2), clean(column, 3), clean(cell, 3).
 
 
 %% clean(Type, Count)
@@ -222,6 +216,3 @@ print_row([Color | Row]) :-
     ansi_format(fg(Color), '#', []),
     print_row(Row).
 
-
-%% *(1) it's not completely valid since groups of the same color might be put together, but those cases will fail when checking the columns...
-%%      assuming the answer is unique.

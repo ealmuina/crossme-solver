@@ -1,0 +1,41 @@
+solve(
+        [
+            [(yellow, 1)],
+            [(yellow, 3), (red, 3), (red, 5)],
+            [(yellow, 3), (red, 5), (red, 7)],
+            [(yellow, 3), (red, 4), (red, 8)],
+            [(red, 2), (yellow, 2), (red, 13)],
+            [(red, 4), (yellow, 1), (red, 12)],
+            [(red, 5), (yellow, 1), (red, 10)],
+            [(red, 16)],
+            [(red, 14)],
+            [(red, 13)],
+            [(red, 11)],
+            [(red, 9)],
+            [(red, 7), (yellow, 1), (yellow, 1)],
+            [(red, 4), (yellow, 2)],
+            [(red, 1), (yellow, 3)]
+        ],
+        [
+            [(yellow, 1)],
+            [(yellow, 3), (red, 4)],
+            [(yellow, 3), (red, 6)],
+            [(yellow, 3), (red, 6)],
+            [(red, 2), (yellow, 2), (red, 7)],
+            [(red, 4), (yellow, 1), (red, 7)],
+            [(red, 5), (yellow, 1), (red, 7)],
+            [(red, 13)],
+            [(red, 12)],
+            [(red, 10)],
+            [(red, 11)],
+            [(red, 12)],
+            [(red, 11), (yellow, 1), (yellow, 1)],
+            [(red, 10), (yellow, 2)],
+            [(red, 9), (yellow, 3)],
+            [(red, 8)],
+            [(red, 6)],
+            [(red, 3)]
+
+        ],
+        Output
+), print_board(Output).

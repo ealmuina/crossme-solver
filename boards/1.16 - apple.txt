@@ -1,0 +1,43 @@
+solve(
+        [
+            [(green, 2)],
+            [(green, 3), (green, 5)],
+            [(green, 6), (green, 1), (green, 6)],
+            [(green, 15)],
+            [(green, 4), (green, 1), (green, 3)],
+            [(green, 1)],
+            [(red, 4), (green, 1), (red, 4)],
+            [(red, 5), (green, 1), (red, 5)],
+            [(red, 15)],
+            [(red, 11), (red, 2)],
+            [(red, 11), (red, 2)],
+            [(red, 12), (red, 2)],
+            [(red, 15)],
+            [(red, 13)],
+            [(red, 3), (red, 8)],
+            [(red, 2), (red, 7)],
+            [(red, 3), (red, 7)],
+            [(red, 2), (red, 6)],
+            [(red, 9)],
+            [(red, 3), (red, 3)]
+        ],
+        [
+            [(green, 1)],
+            [(green, 2), (red, 5)],
+            [(green, 3), (red, 8)],
+            [(green, 4), (red, 11)],
+            [(green, 4), (red, 13)],
+            [(green, 4), (red, 8), (red, 4)],
+            [(green, 2), (red, 8), (red, 2)],
+            [(green, 1), (red, 12)],
+            [(green, 6), (red, 11)],
+            [(green, 1), (red, 12)],
+            [(green, 3), (red, 14)],
+            [(green, 4), (red, 14)],
+            [(green, 4), (red, 3), (red, 8)],
+            [(green, 3), (red, 3), (red, 5)],
+            [(green, 4), (red, 8)],
+            [(green, 3), (red, 5)]
+        ],
+        Output
+), print_board(Output).
