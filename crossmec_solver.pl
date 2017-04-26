@@ -120,6 +120,8 @@ solve(Rows, Columns, Board) :-
     solve, 
     load_board(0, Board).
 
+solve(Rows, Columns, Board) :- clean, fail. %% cleanup after all solutions where found
+
 
 %% store_columns(C, Columns)
 %% Store in the database, the information relative to columns beginning from C.
