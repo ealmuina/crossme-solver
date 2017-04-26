@@ -36,6 +36,12 @@ set_group(R, Pos, Color, Count) :-
     set_group(R, Next, Color, Remaining).
 
 
+%% set_cell(R, C, Color)
+%% Paint a cell with a color.
+%% R: Cell's row number.
+%% C: Cell's column number.
+%% Color: Color to paint the cell with.
+
 set_cell(R, C, Color) :-
     retract(cell(R, C, _)), 
     assert(cell(R, C, Color)).
@@ -59,25 +65,35 @@ fill_board(R) :-
 fill_board(R).
 
 
+%% valid_column(C, Pos, Color)
+%% Check if painting a cell with a color keeps its column valid.
+%% C: Number of the column.
+%% Pos: Pisition of the cell in the column.
+%% Color: Color to paint the cell with.
+
 valid_column(C, Pos, empty) :- !, column(C, [empty | _], _).
 
 valid_column(C, Pos, Color) :- 
     column(C, [empty, Color | _], _), !,
     Previous is Pos - 1,
     not(cell(Previous, C, Color)), %% there can't be two consecutive groups with the same color
-    update_column(C, empty),
-    update_column(C, Color).
+    update_column(C),
+    update_column(C).
 
 valid_column(C, Pos, Color) :-
     column(C, [Color | _], _),
-    update_column(C, Color).
+    update_column(C).
 
 
-update_column(C, Color) :-
+%% update_column(C, Color)
+%% Update information about a column, changing its next color to be checked.
+%% C: Number of the column.
+
+update_column(C) :-
     retract(column(C, [Color | RColors], Colors)),
     assert(column(C, RColors, [Color | Colors])).
 
-update_column(C, Color) :-
+update_column(C) :-
     retract(column(C, RColors, [Color | Colors])),
     assert(column(C, [Color | RColors], Colors)),
     fail.
@@ -98,11 +114,17 @@ solve :- fill_board(0).
 %% Board: List of Lists of colors (each List corresponding to a row); representing a valid solution.
 
 solve(Rows, Columns, Board) :- 
-    store_row(0, Rows), 
+    store_rows(0, Rows), 
     store_columns(0, Columns), 
     store_cells(0, 0), 
     solve, 
     load_board(0, Board).
+
+
+%% store_columns(C, Columns)
+%% Store in the database, the information relative to columns beginning from C.
+%% C: Number of the next column to store.
+%% Columns: List of lists of tuples (Color, Count), each one representing a column's layout.
 
 store_columns(_, []).
 
@@ -113,6 +135,11 @@ store_columns(C, [Colors | Columns]) :-
     store_columns(Next, Columns).
 
 
+%% expand_column(Column, EColumn)
+%% Expand the representation of a column from a list of tuples (Color, Count) to a list with colors.
+%% Column: List of tuples (Color, Count) representing the column layout.
+%% EColumn: List of colors, where each group of colors is between 'empty' items.
+
 expand_column([], []).
 
 expand_column([(_, 0) | Colors], [empty | EColors]) :- !, expand_column(Colors, EColors).
@@ -122,12 +149,17 @@ expand_column([(Color, Count) | Colors], [Color | EColors]) :-
     expand_column([(Color, Remaining) | Colors], EColors).
 
 
-store_row(_, []).
+%% store_rows(R, Rows)
+%% Store in the database, the information relative to rows beginning from R.
+%% R: Number of the next row to store.
+%% Rows: List of lists of tuples (Color, Count), each one representing a row's layout.
 
-store_row(R, [Colors | L]) :- 
+store_rows(_, []).
+
+store_rows(R, [Colors | L]) :- 
     assert(row(R, Colors)), 
     Next is R + 1, 
-    store_row(Next, L).
+    store_rows(Next, L).
 
 
 %% store_cells(R, C)
@@ -209,10 +241,10 @@ print_board([Row | Board]) :-
 print_row([]) :- format('~n').
 
 print_row([empty | Row]) :- !,
-    ansi_format(fg(default), '#', []),
+    ansi_format(fg(default), ' . ', []),
     print_row(Row).
 
 print_row([Color | Row]) :-
-    ansi_format(fg(Color), '#', []),
+    ansi_format(bg(Color), ' . ', []),
     print_row(Row).
 
